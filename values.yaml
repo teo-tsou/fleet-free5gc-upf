@@ -1,0 +1,56 @@
+global:
+  projectName: free5gc
+  userPlaneArchitecture: single
+  uesubnet: 10.1.0.0/16
+
+  # N4 disabled — PFCP runs on pod network (0.0.0.0), exposed via NodePort
+  n4network:
+    enabled: false
+
+  # N3 — GTP-U local to edge cluster (gNB <-> UPF), on Multus ipvlan
+  n3network:
+    enabled: true
+    name: n3network
+    type: ipvlan
+    masterIf: enp1s0
+    subnetIP: 10.100.50.232
+    cidr: 29
+    gatewayIP: 10.100.50.238
+    excludeIP: 10.100.50.238
+
+  # N6 — egress to internet, on Multus ipvlan
+  n6network:
+    enabled: true
+    name: n6network
+    type: ipvlan
+    masterIf: enp1s0
+    subnetIP: 10.100.100.0
+    cidr: 24
+    gatewayIP: 10.100.100.1
+    excludeIP: 10.100.100.254
+
+  # N9 disabled — single UPF, no inter-UPF
+  n9network:
+    enabled: false
+
+upf:
+  name: upf
+
+  # n4if.ipAddress is still needed by the deployment annotation template
+  # but PFCP actually binds 0.0.0.0 (overridden in configmap template)
+  n3if:
+    ipAddress: 10.100.50.233
+  n4if:
+    ipAddress: 10.100.50.241   # kept for template rendering only, not used for PFCP bind
+  n6if:
+    ipAddress: 10.100.100.12
+
+  configuration:
+    dnnList:
+      - dnn: internet
+        cidr: 10.1.0.0/17
+        natifname: n6
+    logger:
+      enable: true
+      level: info
+      reportCaller: false

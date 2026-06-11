@@ -1,0 +1,12 @@
+defaultNamespace: free5gc
+name: free5gc-upf
+
+dependsOn:
+  - name: gtp5g-installer
+  - name: multus-cni
+
+helm:
+  chart: charts
+  releaseName: free5gc-upf
+  valuesFiles:
+    - values.yaml

@@ -61,11 +61,12 @@ upf:
   name: upf
   replicaCount: 1
   image:
-    name: towards5gs/free5gc-upf
-    # MUST match the SMF/core free5GC version (control repo = v4.2.1). Without a
-    # tag the chart used appVersion ("latest"), pulling a different free5GC build
-    # whose PFCP IE encoding the v4.2.1 SMF can't parse → UPF "unexpected EOF" on
-    # Session Establishment → PDU session NETWORK_FAILURE.
+    # Official free5GC image (free5gc/upf), NOT towards5gs/free5gc-upf — the
+    # latter is frozen at v3.3.0 (no v4.x → ErrImagePull). name+tag MUST match
+    # the SMF/core (control repo uses free5gc/upf:v4.2.1). A version skew makes
+    # the UPF fail to decode the SMF's PFCP Session Establishment Request
+    # ("unexpected EOF") → PDU session NETWORK_FAILURE.
+    name: free5gc/upf
     tag: v4.2.1
     pullPolicy: Always
   configmap:
@@ -131,11 +132,12 @@ upf1:
   name: upf1
   replicaCount: 1
   image:
-    name: towards5gs/free5gc-upf
-    # MUST match the SMF/core free5GC version (control repo = v4.2.1). Without a
-    # tag the chart used appVersion ("latest"), pulling a different free5GC build
-    # whose PFCP IE encoding the v4.2.1 SMF can't parse → UPF "unexpected EOF" on
-    # Session Establishment → PDU session NETWORK_FAILURE.
+    # Official free5GC image (free5gc/upf), NOT towards5gs/free5gc-upf — the
+    # latter is frozen at v3.3.0 (no v4.x → ErrImagePull). name+tag MUST match
+    # the SMF/core (control repo uses free5gc/upf:v4.2.1). A version skew makes
+    # the UPF fail to decode the SMF's PFCP Session Establishment Request
+    # ("unexpected EOF") → PDU session NETWORK_FAILURE.
+    name: free5gc/upf
     tag: v4.2.1
     pullPolicy: Always
   configmap:
@@ -200,11 +202,12 @@ upf2:
   name: upf2
   replicaCount: 1
   image:
-    name: towards5gs/free5gc-upf
-    # MUST match the SMF/core free5GC version (control repo = v4.2.1). Without a
-    # tag the chart used appVersion ("latest"), pulling a different free5GC build
-    # whose PFCP IE encoding the v4.2.1 SMF can't parse → UPF "unexpected EOF" on
-    # Session Establishment → PDU session NETWORK_FAILURE.
+    # Official free5GC image (free5gc/upf), NOT towards5gs/free5gc-upf — the
+    # latter is frozen at v3.3.0 (no v4.x → ErrImagePull). name+tag MUST match
+    # the SMF/core (control repo uses free5gc/upf:v4.2.1). A version skew makes
+    # the UPF fail to decode the SMF's PFCP Session Establishment Request
+    # ("unexpected EOF") → PDU session NETWORK_FAILURE.
+    name: free5gc/upf
     tag: v4.2.1
     pullPolicy: Always
   configmap:
@@ -269,11 +272,12 @@ upfb:
   name: upfb
   replicaCount: 1
   image:
-    name: towards5gs/free5gc-upf
-    # MUST match the SMF/core free5GC version (control repo = v4.2.1). Without a
-    # tag the chart used appVersion ("latest"), pulling a different free5GC build
-    # whose PFCP IE encoding the v4.2.1 SMF can't parse → UPF "unexpected EOF" on
-    # Session Establishment → PDU session NETWORK_FAILURE.
+    # Official free5GC image (free5gc/upf), NOT towards5gs/free5gc-upf — the
+    # latter is frozen at v3.3.0 (no v4.x → ErrImagePull). name+tag MUST match
+    # the SMF/core (control repo uses free5gc/upf:v4.2.1). A version skew makes
+    # the UPF fail to decode the SMF's PFCP Session Establishment Request
+    # ("unexpected EOF") → PDU session NETWORK_FAILURE.
+    name: free5gc/upf
     tag: v4.2.1
     pullPolicy: Always
   configmap:

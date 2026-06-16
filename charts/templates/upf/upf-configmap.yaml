@@ -11,12 +11,20 @@ data:
     version: 1.0.3
     description: UPF initial local configuration
 
-    # N4 (PFCP): bind on 0.0.0.0 so NodePort can DNAT to the pod.
-    # nodeID is also 0.0.0.0 — the platform must configure the SMF
-    # to reach the UPF at <node-IP>:<nodePort> over the cross-cluster fabric.
+    # N4 (PFCP): bind on 0.0.0.0 so the NodePort can DNAT to the pod.
+    #
+    # nodeID MUST equal the address the SMF dials the UPF by — the `n4` binding
+    # FQDN. The SMF keys its PFCPContext by ResolveNodeIdToIp(userplaneInfo UPF
+    # nodeID) = ResolveNodeIdToIp(n4.upstream.svc) and then looks the Session
+    # Establishment Response up by ResolveNodeIdToIp(UPF's reported nodeID). If
+    # the UPF reports 0.0.0.0 those keys differ and the SMF nil-derefs
+    # (datapath.go:163). Reporting the same FQDN makes both resolve to the same
+    # IP in the SMF's cluster. The UPF can't resolve this name locally, so its
+    # own F-SEID IPv4 is empty — harmless: the SMF uses the SEID + NodeID, and
+    # the N3 data path uses the separate GTP-U F-TEID (the n3 ipvlan IP).
     pfcp:
       addr: 0.0.0.0
-      nodeID: 0.0.0.0
+      nodeID: n4.upstream.svc.cluster.local
       retransTimeout: 1s
       maxRetrans: 3
 

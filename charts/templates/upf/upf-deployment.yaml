@@ -39,6 +39,17 @@ spec:
         project: {{ $.Values.global.projectName }}
         nf: {{ .name }}
     spec:
+      # go-upf resolves cfg.Pfcp.NodeID to an IP at startup and refuses to start
+      # if it can't ("NodeID can't be resolved"). Our nodeID is the `n4` binding
+      # FQDN — resolvable in the SMF's UC (where the binding Service lives) but
+      # NOT here in the UPF's UC. Pin it locally so go-upf starts; the value is
+      # only used for the UPF's own (unused) F-SEID IP, while the NodeID IE still
+      # carries the FQDN string for the SMF to resolve to the real binding IP
+      # (so its PFCPContext lookup matches and it doesn't nil-deref).
+      hostAliases:
+        - ip: "127.0.0.1"
+          hostnames:
+            - "n4.upstream.svc.cluster.local"
       imagePullSecrets:
         {{- toYaml .imagePullSecrets | nindent 8 }}
       securityContext:

@@ -31,6 +31,12 @@ data:
   wrapper.sh: |
     #!/bin/sh
 
+    # Lower the pod-network (N4/PFCP) MTU to match the SMF, so PFCP isn't
+    # re-fragmented across the cross-UC OVN-IC + NodePort path. eth0 carries
+    # only PFCP here — N3/N6 user-plane ride dedicated Multus interfaces, so
+    # this does not touch the data path.
+    ip link set dev eth0 mtu {{ .pfcpMtu | default 1280 }} || true
+
     ### Implement networking rules
     iptables -A FORWARD -j ACCEPT
     iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o n6 -j MASQUERADE

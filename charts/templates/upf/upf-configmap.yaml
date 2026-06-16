@@ -51,6 +51,16 @@ data:
     # The decapsulated UE packets are *forwarded*, so forwarding must be on in
     # THIS pod netns (the gtp5g daemonset only set it on the host netns).
     sysctl -w net.ipv4.ip_forward=1 2>/dev/null || echo 1 > /proc/sys/net/ipv4/ip_forward
+
+    # The N3/N6 Multus NADs each install a "default via <gateway>" route from
+    # their IPAM gateway. The N6 one points at a non-existent gateway
+    # ({{ $.Values.global.n6network.gatewayIP }}, ARP FAILED), and it wins the
+    # default-route race over eth0 — so UE internet traffic was sent out n6 and
+    # bounced as "host unreachable". N3/N6 only need their on-link subnet routes;
+    # internet egress is eth0. Drop both bogus defaults so eth0's default wins.
+    ip route del default dev n3 2>/dev/null || true
+    ip route del default dev n6 2>/dev/null || true
+
     iptables -A FORWARD -j ACCEPT
     iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE
 

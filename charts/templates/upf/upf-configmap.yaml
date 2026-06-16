@@ -40,15 +40,19 @@ data:
     #!/bin/sh
 
     ### Implement networking rules
+    # UE internet egress goes out eth0 (the pod network), which has real internet
+    # via the cluster/node. The N6 Multus ipvlan ({{ $.Values.global.n6network.subnetIP }}/{{ $.Values.global.n6network.cidr }})
+    # is an isolated subnet with no real gateway/egress, so routing UE traffic
+    # through the n6if table blackholed it (the UE could reach the UPF's own N6
+    # IP but not 8.8.8.8). This matches the official non-multus UPF: NAT the UE
+    # pool out eth0 and let it follow the default route. The n6 interface stays
+    # attached for the upfcfg N6 reference; only the egress path changes.
+    #
+    # The decapsulated UE packets are *forwarded*, so forwarding must be on in
+    # THIS pod netns (the gtp5g daemonset only set it on the host netns).
+    sysctl -w net.ipv4.ip_forward=1 2>/dev/null || echo 1 > /proc/sys/net/ipv4/ip_forward
     iptables -A FORWARD -j ACCEPT
-    iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o n6 -j MASQUERADE
-    # free5gc/upf image ships no /etc/iproute2; seed it from the system defaults
-    # so the named "n6if" table resolves alongside local/main/default.
-    mkdir -p /etc/iproute2
-    [ -f /etc/iproute2/rt_tables ] || cp /usr/share/iproute2/rt_tables /etc/iproute2/rt_tables 2>/dev/null || true
-    echo "1200 n6if" >> /etc/iproute2/rt_tables
-    ip rule add from {{ $.Values.global.uesubnet }} table n6if
-    ip route add default via {{ $.Values.global.n6network.gatewayIP }} dev n6 table n6if
+    iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE
 
     {{- if $.Values.upf.configmap.wrapperAdditionalCommands }}
     {{- $.Values.upf.configmap.wrapperAdditionalCommands | toYaml | indent 2 }}

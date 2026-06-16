@@ -48,6 +48,10 @@ data:
     ### Implement networking rules
     iptables -A FORWARD -j ACCEPT
     iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o n6 -j MASQUERADE  # route traffic comming from the UE SUBNET to the interface N6
+    # free5gc/upf image ships no /etc/iproute2; seed it from the system defaults
+    # so the named "n6if" table resolves alongside local/main/default.
+    mkdir -p /etc/iproute2
+    [ -f /etc/iproute2/rt_tables ] || cp /usr/share/iproute2/rt_tables /etc/iproute2/rt_tables 2>/dev/null || true
     echo "1200 n6if" >> /etc/iproute2/rt_tables # create a routing table for the interface N6
     ip rule add from {{ $.Values.global.uesubnet }} table n6if   # use the created ip table to route the traffic comming from the UE SUBNET
     ip route add default via {{ $.Values.global.n6network.gatewayIP }} dev n6 table n6if  # add a default route in the created table so that all UEs will use this gateway for external communications (target IP not in the Data Network attached to the interface N6) and then the Data Network will manage to route the traffic
@@ -56,7 +60,7 @@ data:
     {{- $.Values.upf1.configmap.wrapperAdditionalCommands | toYaml | indent 2 }}
     {{- end }}
 
-    /free5gc/upf/upf -c {{ .volume.mount }}/upfcfg.yaml
+    /free5gc/upf -c {{ .volume.mount }}/upfcfg.yaml   # binary is /free5gc/upf in the official image
 
 {{- end }}
 {{- end }}

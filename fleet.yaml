@@ -2,7 +2,6 @@ defaultNamespace: free5gc
 name: free5gc-upf
 
 dependsOn:
-  - name: gtp5g-installer
   - name: multus-cni
 
 helm:

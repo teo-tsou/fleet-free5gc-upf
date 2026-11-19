@@ -9,6 +9,10 @@ metadata:
     project: {{ $.Values.global.projectName }}
     nf: {{ .name }}
 spec:
+  # Recreate: the pod holds fixed Multus ipvlan addresses; a rolling update's new pod could not take them while the
+  # old one runs ("address already in use", IntEdge OAI split drill 2026-11-19)
+  strategy:
+    type: Recreate
   {{- if not .autoscaling.enabled }}
   replicas: {{ .replicaCount }}
   {{- end }}
